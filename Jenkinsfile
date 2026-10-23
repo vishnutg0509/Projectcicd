@@ -38,6 +38,20 @@ pipeline {
             }
         }
 
+        
+        stage('Trivy Filesystem Scan') {
+            steps {
+                sh '''
+                    trivy fs \
+                      --scanners vuln,secret,misconfig \
+                      --severity HIGH,CRITICAL \
+                      --exit-code 0 \
+                      --no-progress \
+                      .
+                '''
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
