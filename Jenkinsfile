@@ -39,18 +39,19 @@ pipeline {
         }
 
         
-        stage('Trivy Filesystem Scan') {
-            steps {
-                sh '''
-                    trivy fs \
-                      --scanners vuln,secret,misconfig \
-                      --severity HIGH,CRITICAL \
-                      --exit-code 0 \
-                      --no-progress \
-                      .
-                '''
-            }
-        }
+    stage('Trivy Image Scan') {
+        steps {
+        sh '''
+            trivy \
+              --cache-dir /tmp/trivy-image-cache \
+              image \
+              --severity HIGH,CRITICAL \
+              --exit-code 0 \
+              --no-progress \
+              vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER}
+        '''
+    }
+}
 
         
         stage('Build Docker Image') {
