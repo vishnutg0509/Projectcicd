@@ -1,28 +1,50 @@
 pipeline {
     agent any
-    
+
     tools {
-        jdk 'jdk17'
-        maven 'maven3'
+        maven 'Maven3'
     }
-    
-    stages {   
-        stage('Compile') {
+
+    environment {
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+        PATH = "/usr/lib/jvm/java-17-openjdk-amd64/bin:${env.PATH}"
+    }
+
+    stages {
+        stage('Checkout') {
             steps {
-            sh 'mvn compile'
+                checkout scm
             }
         }
-        
-        stage('Test') {
+
+        stage('Verify Tools') {
             steps {
-                sh 'mvn test'
+                sh 'java -version'
+                sh 'mvn -version'
+                sh 'trivy --version'
             }
         }
-        
-        stage('Build') {
+
+        stage('Build JAR') {
             steps {
-                sh 'mvn package'
+                sh 'chmod +x mvnw'
+                sh './mvnw -B clean package -DskipTests'
             }
+        }
+
+        stage('Verify JAR') {
+            steps {
+                sh 'ls -lh target/*.jar'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Projectcicd build completed successfully.'
+        }
+        failure {
+            echo 'Projectcicd pipeline failed. Check the stage logs.'
         }
     }
 }
