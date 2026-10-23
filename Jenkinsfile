@@ -37,14 +37,22 @@ pipeline {
                 sh 'ls -lh target/*.jar'
             }
         }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh './mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar -Dsonar.projectKey=Boardgame -DskipTests'
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'Projectcicd build completed successfully.'
+            echo 'Build and SonarQube analysis completed successfully.'
         }
         failure {
-            echo 'Projectcicd pipeline failed. Check the stage logs.'
+            echo 'Pipeline failed. Check the stage logs.'
         }
     }
 }
