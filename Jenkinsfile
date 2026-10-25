@@ -39,40 +39,38 @@ pipeline {
         }
 
             
-            stage('Trivy Image Scan') {
-                steps {
-                    sh '''
-                        trivy \
-                          --cache-dir /tmp/trivy-image-cache \
-                          image \
-                          --severity HIGH,CRITICAL \
-                          --exit-code 0 \
-                          --no-progress \
-                          vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER}
-                    '''
-                }
-        }
-
-
         
-        stage('Build Docker Image') {
-            steps {
-                sh '''
-                    docker build -t vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER} .
-                    docker tag vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER} \
-                      vishnutg0509/projectcicd-pipeline:latest
-                '''
-            }
-        }
+stage('Build Docker Image') {
+    steps {
+        sh '''
+            docker build -t vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER} .
+            docker tag vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER} \
+                vishnutg0509/projectcicd-pipeline:latest
+        '''
+    }
+}
 
-        stage('Push Docker Image') {
-            steps {
-                sh '''
-                    docker push vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER}
-                    docker push vishnutg0509/projectcicd-pipeline:latest
-                '''
-            }
-        }
+stage('Trivy Image Scan') {
+    steps {
+        sh '''
+            trivy --cache-dir /tmp/trivy-image-cache image \
+                --severity HIGH,CRITICAL \
+                --exit-code 0 \
+                --no-progress \
+                vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER}
+        '''
+    }
+}
+
+stage('Push Docker Image') {
+    steps {
+        sh '''
+            docker push vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER}
+            docker push vishnutg0509/projectcicd-pipeline:latest
+        '''
+    }
+}
+
 
 
         stage('SonarQube Analysis') {
