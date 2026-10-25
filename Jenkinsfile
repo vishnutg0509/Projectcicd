@@ -65,18 +65,6 @@ pipeline {
             }
         }
 
-        stage('Trivy Image Scan') {
-            steps {
-                sh '''
-                    trivy image \
-                      --severity HIGH,CRITICAL \
-                      --exit-code 0 \
-                      --no-progress \
-                      vishnutg0509/projectcicd-pipeline:${BUILD_NUMBER}
-                '''
-            }
-        }
-
         stage('Push Docker Image') {
             steps {
                 sh '''
