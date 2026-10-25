@@ -89,8 +89,7 @@ pipeline {
                     PARAM_FILE=$(mktemp)
                     trap 'rm -f "$PARAM_FILE"' EXIT
 
-                    printf '{"commands":["set -e; kubectl set image deployment/projectcicd projectcicd=vishnutg0509/projectcicd-pipeline:%s -n default && kubectl rollout status deployment/projectcicd --timeout=180s -n default"]}' \
-                        "$BUILD_NUMBER" > "$PARAM_FILE"
+                    printf '{"commands":["set -e; export KUBECONFIG=/home/ssm-user/.kube/config; kubectl set image deployment/projectcicd projectcicd=vishnutg0509/projectcicd-pipeline:%s -n default && kubectl rollout status deployment/projectcicd --timeout=180s -n default"]}' "$BUILD_NUMBER" > "$PARAM_FILE"
 
                     COMMAND_ID=$(/usr/local/bin/aws ssm send-command \
                         --instance-ids "$K8S_MASTER_ID" \
