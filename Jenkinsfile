@@ -43,13 +43,60 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        
+        stage('Publish Maven Artifact to Nexus') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh './mvnw -B org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922:sonar -Dsonar.projectKey=Boardgame -DskipTests'
+                withCredentials([usernamePassword(
+                    credentialsId: 'nexus-credentials',
+                    usernameVariable: 'NEXUS_USERNAME',
+                    passwordVariable: 'NEXUS_PASSWORD'
+                )]) {
+                    sh '''
+                        set -eu
+                        SETTINGS_FILE=$(mktemp)
+                        trap 'rm -f "$SETTINGS_FILE"' EXIT
+
+                        export SETTINGS_FILE
+
+                        python3 <<'PY'
+import os
+from xml.sax.saxutils import escape
+
+username = escape(os.environ["NEXUS_USERNAME"])
+password = escape(os.environ["NEXUS_PASSWORD"])
+
+settings = f"""<settings>
+  <servers>
+    <server>
+      <id>nexus-releases</id>
+      <username>{username}</username>
+      <password>{password}</password>
+    </server>
+    <server>
+      <id>nexus-snapshots</id>
+      <username>{username}</username>
+      <password>{password}</password>
+    </server>
+  </servers>
+</settings>
+"""
+
+with open(os.environ["SETTINGS_FILE"], "w") as f:
+    f.write(settings)
+PY
+
+                        ./mvnw -B -DskipTests \
+                          -s "$SETTINGS_FILE" \
+                          -DaltReleaseDeploymentRepository=nexus-releases::http://10.20.144.197:8081/repository/maven-releases/ \
+                          -DaltSnapshotDeploymentRepository=nexus-snapshots::http://10.20.144.197:8081/repository/maven-snapshots/ \
+                          org.apache.maven.plugins:maven-deploy-plugin:3.2.0:deploy
+
+                        echo "Maven artifact published to Nexus successfully."
+                    '''
                 }
             }
         }
+
 
         stage('Build Docker Image') {
             steps {
