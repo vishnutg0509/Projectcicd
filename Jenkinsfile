@@ -86,9 +86,9 @@ with open(os.environ["SETTINGS_FILE"], "w") as f:
 PY
 
                         ./mvnw -B -DskipTests \
-                          -s "$SETTINGS_FILE" \
-                          -DaltReleaseDeploymentRepository=nexus-releases::http://10.20.144.197:8081/repository/maven-releases/ \
-                          -DaltSnapshotDeploymentRepository=nexus-snapshots::http://10.20.144.197:8081/repository/maven-snapshots/ \
+                          -s "$SETTINGS_FILE" \ 
+                        -DaltReleaseDeploymentRepository=nexus-releases::default::http://10.20.144.197:8081/repository/maven-releases/
+                        -DaltSnapshotDeploymentRepository=nexus-snapshots::default::http://10.20.144.197:8081/repository/maven-snapshots/
                             deploy
                             
                         echo "Maven artifact published to Nexus successfully."
