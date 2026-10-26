@@ -89,8 +89,8 @@ PY
                           -s "$SETTINGS_FILE" \
                           -DaltReleaseDeploymentRepository=nexus-releases::http://10.20.144.197:8081/repository/maven-releases/ \
                           -DaltSnapshotDeploymentRepository=nexus-snapshots::http://10.20.144.197:8081/repository/maven-snapshots/ \
-                          org.apache.maven.plugins:maven-deploy-plugin:3.2.0:deploy
-
+                            deploy
+                            
                         echo "Maven artifact published to Nexus successfully."
                     '''
                 }
